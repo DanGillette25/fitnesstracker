@@ -1,9 +1,9 @@
 const express = require("express");
-const mongojs = require("mongojs");
 const mongoose = require("mongoose");
-const logger = require("morgan");
 const path = require("path");
 const Workout = require("./models/Workout")
+
+const PORT = process.env.PORT || 3000
 
 const app = express();
 
@@ -41,6 +41,8 @@ app.get("/api/workouts", (req, res) => {
 
 app.get("/api/workouts/range", (req, res) => {
   Workout.find({})
+  .sort({ day: -1 })
+  .limit(7)
   .then(dbWorkout => {
     res.json(dbWorkout)
   })
@@ -64,6 +66,8 @@ app.put("/api/workouts/:id", (req, res) => {
 
   const id = req.params.id
   const body = req.body
+
+  if (body.name) {
   
   Workout.findOneAndUpdate({ _id: id, }, { $push: { exercises: body, } })
   
@@ -74,9 +78,13 @@ app.put("/api/workouts/:id", (req, res) => {
     res.status(400).json(err);
   });
 
+} else {
+  res.end
+}
+
 })
 
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log("App running on port 3000!");
 });
